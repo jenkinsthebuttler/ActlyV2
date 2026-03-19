@@ -2,10 +2,37 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from app.tools.registry import discover_tools
 from app.api.routes import auth, skills, balance, execute, payments
+import asyncio
+import sqlalchemy
+from sqlalchemy import text
+
+
+async def wait_for_db(max_retries=30, delay=2):
+    """Wait for the database to be ready."""
+    from app.config import get_database_url
+    url = get_database_url()
+    for i in range(max_retries):
+        try:
+            from sqlalchemy.ext.asyncio import create_async_engine
+            engine = create_async_engine(url, echo=False)
+            async with engine.connect() as conn:
+                await conn.execute(text("SELECT 1"))
+            await engine.dispose()
+            print(f"Database connected on attempt {i+1}")
+            return True
+        except Exception as e:
+            if i < max_retries - 1:
+                print(f"DB not ready (attempt {i+1}/{max_retries}): {e}. Retrying in {delay}s...")
+                await asyncio.sleep(delay)
+            else:
+                print(f"Database connection failed after {max_retries} attempts: {e}")
+                raise
+    return False
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await wait_for_db()
     discover_tools()
     yield
 

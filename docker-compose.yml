@@ -10,6 +10,13 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - BASE_URL=${BASE_URL:-http://localhost:8000}
+      - WAIT_FOR_DB=${WAIT_FOR_DB:-true}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     depends_on:
       db:
         condition: service_healthy
@@ -21,10 +28,11 @@ services:
       - POSTGRES_DB=actly
       - POSTGRES_PASSWORD=actly123
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d actly"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
     volumes:
       - pgdata:/var/lib/postgresql/data
 
