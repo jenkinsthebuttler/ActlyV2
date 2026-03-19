@@ -2,23 +2,12 @@ services:
   app:
     build: .
     restart: always
-    ports:
-      - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:actly123@db:5432/actly
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:jcbcq5HFC8c8iAyBgIncKslLyF7kEKqtVRVDOyabWARCcX80BNeFD9d6YMYK9s1Z@ob7rveuuqeb6syqaadaztods:5432/postgres}
       - SECRET_KEY=${SECRET_KEY:-actly-dev-secret-change-in-prod}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
       - BASE_URL=${BASE_URL:-http://localhost:8000}
-
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      - POSTGRES_DB=actly
-      - POSTGRES_PASSWORD=actly123
-    volumes:
-      - pgdata:/var/lib/postgresql/data
 
 volumes:
   pgdata:
