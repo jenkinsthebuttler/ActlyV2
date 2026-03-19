@@ -3,7 +3,7 @@ services:
     build: .
     restart: always
     environment:
-      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:jcbcq5HFC8c8iAyBgIncKslLyF7kEKqtVRVDOyabWARCcX80BNeFD9d6YMYK9s1Z@ob7rveuuqeb6syqaadaztods:5432/postgres}
+      - DATABASE_URL=${DATABASE_URL:-postgresql+asyncpg://postgres:w7RvNfhjSVSQQZ5Byv2YVxfS9MV8jVXpNGHxp0FfI9F4avlLq4vvzVSxtxACFH7L@j146dy5aqhzc7ee8f002nltt:5432/postgres}
       - SECRET_KEY=${SECRET_KEY:-actly-dev-secret-change-in-prod}
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
