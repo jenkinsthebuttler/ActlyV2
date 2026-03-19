@@ -3,21 +3,24 @@
 
 set -e
 
-DATABASE_URL="${DATABASE_URL:-postgresql+asyncpg://postgres:actly123@db:5432/actly}"
-
-echo "Waiting for database to be ready..."
+echo "Waiting for database..."
 for i in $(seq 1 30); do
-    # Extract host from DATABASE_URL
-    DB_HOST=$(echo "$DATABASE_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
-    DB_PORT=$(echo "$DATABASE_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
-    DB_HOST="${DB_HOST:-db}"
+    # Extract host and port from DATABASE_URL
+    DB_URL="${DATABASE_URL}"
+    DB_HOST=$(echo "$DB_URL" | sed -n 's|.*@\([^:]*\):.*|\1|p')
+    DB_PORT=$(echo "$DB_URL" | sed -n 's|.*:\([0-9]*\)/.*|\1|p')
+    DB_HOST="${DB_HOST:-localhost}"
     DB_PORT="${DB_PORT:-5432}"
     
-    if nc -z "$DB_HOST" "$DB_PORT" 2>/dev/null; then
-        echo "Port $DB_PORT is open on $DB_HOST — database is up"
+    # Try to connect using bash /dev/tcp or curl
+    if timeout 1 bash -c "echo >/dev/tcp/$DB_HOST/$DB_PORT" 2>/dev/null; then
+        echo "Database is up on $DB_HOST:$DB_PORT"
         break
     fi
-    echo "Attempt $i/30: Database not ready on $DB_HOST:$DB_PORT, waiting 2s..."
+    if [ $i -eq 30 ]; then
+        echo "WARNING: Database not reachable after 30 attempts — starting anyway"
+    fi
+    echo "Attempt $i/30: Database not ready, waiting 2s..."
     sleep 2
 done
 
